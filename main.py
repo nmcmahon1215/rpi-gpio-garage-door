@@ -48,7 +48,7 @@ def trigger_door():
         finally:
             GPIO.output(relay_pin, 1)
 
-        Timer(10, mark_complete, []).start()
+        Timer(config.get_server_config().get("open_delay", 10), mark_complete, []).start()
         processing_target = target_state
     return Response(status=200)
 
@@ -58,6 +58,8 @@ def mark_complete():
     last_target = processing_target
     processing_target = None
     if last_target == DOOR_STATE.OPEN:
+        sensor_change("update")
+    elif last_target == DOOR_STATE.CLOSED and get_current_state() != DOOR_STATE.CLOSED:
         sensor_change("update")
 
 
